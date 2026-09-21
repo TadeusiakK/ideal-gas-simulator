@@ -1,0 +1,6 @@
+# Runtime dependencies of the simulation API.
+# Install:  .\env\Scripts\python.exe -m pip install -r requirements.txt
+
+fastapi
+uvicorn[standard]
+pydantic
