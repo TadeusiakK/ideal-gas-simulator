@@ -5,3 +5,4 @@ venv/
 
 # Python Artifacts
 __pycache__/
+.pytest_cache/
