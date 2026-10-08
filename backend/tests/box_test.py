@@ -5,25 +5,25 @@ import random as r
 
 box_width = 10
 box_height = 10
+particle_max_radius = 2.5
 max_speed = 10
 particle_count = 5
 
 
 def make_box():
   """Return a fresh box so every test starts from empty state."""
-  return Box(box_width, box_height)
+  return Box(box_width, box_height, particle_max_radius)
 
 
 def make_particles(count=particle_count):
   """Return particles that are guaranteed to fit inside the box."""
-  max_radius = min(box_width, box_height) / 4
   return [
     Particle(
       r.uniform(-box_width / 2, box_width / 2),
       r.uniform(-box_height / 2, box_height / 2),
       r.uniform(1, max_speed),
       r.uniform(1, max_speed),
-      r.uniform(0.5, max_radius),
+      r.uniform(0.5, particle_max_radius),
       r.randint(1, 10),
     )
     for _ in range(count)
@@ -38,7 +38,7 @@ def test_add_particles():
 
 def test_oversized_particle_is_rejected():
   box = make_box()
-  oversized = Particle(0, 0, 0, 0, box_width / 2, 1)
+  oversized = Particle(0, 0, 0, 0, particle_max_radius + 1, 1)
   with pytest.raises(ValueError):
     box.add_particles([oversized])
 
@@ -46,7 +46,7 @@ def test_oversized_particle_is_rejected():
 def test_rejected_batch_leaves_box_unchanged():
   box = make_box()
   box.add_particles(make_particles())
-  oversized = Particle(0, 0, 0, 0, box_width / 2, 1)
+  oversized = Particle(0, 0, 0, 0, particle_max_radius + 1, 1)
   with pytest.raises(ValueError):
     box.add_particles(make_particles() + [oversized])
   assert len(box.particles) == particle_count
@@ -54,7 +54,12 @@ def test_rejected_batch_leaves_box_unchanged():
 
 def test_non_positive_dimensions_are_rejected():
   with pytest.raises(ValueError):
-    Box(0, box_height)
+    Box(0, box_height, particle_max_radius)
+
+
+def test_particle_max_radius_that_does_not_fit_is_rejected():
+  with pytest.raises(ValueError):
+    Box(box_width, box_height, min(box_width, box_height) / 2)
 
 
 def test_particles_stay_inside_the_box():
